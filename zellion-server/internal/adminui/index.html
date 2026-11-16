@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZEllion Server · Gateway Console</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: rgba(255, 255, 255, 0.94);
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --success: #059669;
+      --danger: #e11d48;
+      --amber: #d97706;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 85% 10%, #dbeafe 0%, #f8fafc 42%, #ffffff 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    code, pre, .mono {
+      font-family: "Fira Code", Consolas, ui-monospace, monospace;
+    }
+    .hidden { display: none !important; }
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 410px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.07);
+    }
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid #bfdbfe;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    h1, h2, h3, h4 { margin: 0; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="password"], input[type="number"], select, textarea {
+      width: 100%;
+      padding: 8px 11px;
+      font-size: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-outline { background: #fff; color: #334155; border-color: #cbd5e1; }
+    .btn-outline:hover:not(:disabled) { background: #f1f5f9; color: #0f172a; }
+    .btn-danger { background: #fff1f2; color: var(--danger); border-color: #fecdd3; }
+    .btn-danger:hover:not(:disabled) { background: #ffe4e6; }
+    .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 7px; }
+    .btn-xs { padding: 3px 7px; font-size: 11px; border-radius: 6px; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 5px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: #475569;
+      cursor: pointer;
+    }
+    .nav-tab.active {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .container {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+    .group-card {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .group-card.drag-over {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    }
+    .model-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 13px 15px;
+      margin-top: 10px;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .model-item.drag-over {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+    }
+    .drag-handle {
+      cursor: grab;
+      color: #94a3b8;
+      font-size: 14px;
+      padding: 2px 4px;
+      user-select: none;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .group-icon-box {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .group-icon-box img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      display: block;
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .pill img { width: 13px; height: 13px; object-fit: contain; }
+    .pill-green { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .pill-gray { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+    .pill-blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .pill-amber { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .pill-red { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .flex-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .muted { color: var(--muted); font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    th { font-weight: 600; color: #475569; background: #f8fafc; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.32);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 60;
+    }
+    .modal-box {
+      width: 100%;
+      max-width: 740px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 22px 24px;
+      box-shadow: 0 25px 50px rgba(15, 23, 42, 0.18);
+    }
+    .check-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      background: #fff;
+    }
+    .check-chip input { margin: 0; }
+    .check-chip img { width: 14px; height: 14px; object-fit: contain; }
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .route-row {
+      display: grid;
+      grid-template-columns: 1.3fr 1.4fr 80px 80px auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- LOGIN VIEW -->
+  <div id="loginView" class="login-wrap">
+    <form id="loginForm" class="login-card">
+      <div class="brand-badge">✦ ZEllion Sanctum · Magpie Gateway</div>
+      <h1 style="font-size: 20px; margin-bottom: 6px;">服务端聚合管理控制台</h1>
+      <p class="muted" style="margin-top: 0; margin-bottom: 22px;">
+        根路径与未知 IP 访问处于静默保护状态。请使用服务端 <code>ZS</code> 文件中配置的管理员凭据登录。
+      </p>
+      <div id="loginErr" style="color: var(--danger); font-size: 12px; margin-bottom: 12px;" class="hidden"></div>
+      <div class="form-group">
+        <label>管理账号 (ADMIN_USER)</label>
+        <input type="text" id="loginUser" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label>管理密码 (ADMIN_PASS)</label>
+        <input type="password" id="loginPass" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px;">进入管理后台</button>
+    </form>
+  </div>
+
+  <!-- MAIN CONSOLE -->
+  <div id="consoleView" class="hidden">
+    <header class="topbar">
+      <div class="flex-row">
+        <span class="brand-badge" style="margin: 0;">✦ ZEllion Server</span>
+        <span style="font-weight: 700; font-size: 14px;">Magpie 多渠道模型聚合网关</span>
+        <span id="tlsBadge" class="pill pill-gray mono">HTTP</span>
+        <span id="extApiTopBadge" class="pill pill-gray mono">API 未开启</span>
+      </div>
+
+      <nav class="nav-tabs">
+        <button type="button" class="nav-tab active" data-tab="models">客户端模型编排</button>
+        <button type="button" class="nav-tab" data-tab="extapi">对外 API 服务 (HTTPS)</button>
+        <button type="button" class="nav-tab" data-tab="providers">上游 API 渠道</button>
+        <button type="button" class="nav-tab" data-tab="config">ZS 配置与 HTTPS 证书</button>
+        <button type="button" class="nav-tab" data-tab="logs">网关调用日志</button>
+      </nav>
+
+      <div class="flex-row">
+        <button type="button" class="btn btn-outline btn-sm" id="refreshBtn">刷新状态</button>
+        <button type="button" class="btn btn-outline btn-sm" id="logoutBtn">退出登录</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- TAB 1: CLIENT MODELS & GROUPS -->
+      <section id="tab-models">
+        <div class="flex-between" style="margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 17px;">客户端模型分组、图标与排序编排</h2>
+            <p class="muted" style="margin: 4px 0 0;">
+              创建自定义分组并导入 SVG / PNG 等图标（客户端选择模型时自动展示分组图标），支持拖拽或 ↑ / ↓ 按钮手动调整组顺序与组内模型顺序。
+            </p>
+          </div>
+          <div class="flex-row">
+            <button type="button" class="btn btn-outline" id="addClientGroupBtn">+ 新建模型分组</button>
+            <button type="button" class="btn btn-primary" id="addModelBtn">+ 发布客户端模型</button>
+          </div>
+        </div>
+        <div id="modelsList"></div>
+      </section>
+
+      <!-- TAB 2: INDEPENDENT EXTERNAL HTTPS API SERVICE -->
+      <section id="tab-extapi" class="hidden">
+        <!-- 1. Listener & Domain Status -->
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 12px;">
+            <div>
+              <h2 style="font-size: 16px;">独立对外 API 服务（强制仅 HTTPS · 与客户端服务完全独立）</h2>
+              <p class="muted" style="margin: 4px 0 0;">
+                开启后外部工具或用户只需直接输入域名（如 <code>https://您的域名</code>，默认免端口号 443）与服务端生成的专属 API Key 即可调用。明文 HTTP 请求将被严格拦截拒绝。
+              </p>
+            </div>
+            <div id="extApiRuntimeStatus"></div>
+          </div>
+
+          <form id="extApiConfigForm">
+            <div class="grid-3" style="align-items: end;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="check-chip" style="padding: 8px 12px; width: 100%;">
+                  <input type="checkbox" id="extApiEnabled" />
+                  <span style="font-weight: 600;">启用独立 HTTPS API 服务</span>
+                </label>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label>HTTPS 监听端口 (443 = 直接输域名免端口)</label>
+                <input type="number" id="extApiHttpsPort" class="mono" min="1" max="65535" value="443" />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="check-chip" style="padding: 8px 12px; width: 100%;">
+                  <input type="checkbox" id="extApiGuard80" checked />
+                  <span>80 端口明文 HTTP 访问自动拦截拒绝</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="card" style="background: #f8fafc; padding: 12px 14px; margin: 14px 0 12px;">
+              <div style="font-size: 12px; font-weight: 600; color: #1e293b; margin-bottom: 6px;">外部客户端直接填写域名接入方式（兼容 OpenAI / Responses / Anthropic / Gemini 协议）：</div>
+              <div id="extApiEndpointGuide" class="mono" style="font-size: 12px; color: #1e40af; line-height: 1.7;"></div>
+            </div>
+
+            <div class="flex-row">
+              <button type="submit" class="btn btn-primary btn-sm">保存并立即生效</button>
+              <span class="muted">证书自动复用「ZS 配置与 HTTPS 证书」中的域名 PEM 证书（支持免重启热更新）。</span>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2. Server-Generated API Keys -->
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 14px;">
+            <div>
+              <h3 style="font-size: 15px;">服务端 API 密钥 (Keys) 与可用范围授权</h3>
+              <p class="muted" style="margin: 3px 0 0;">
+                由服务端高强度随机生成 Key，可单独勾选允许调用的模型，也可直接绑定下方建立的「组」可用范围预设。
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="addExtKeyBtn">+ 生成新 API Key</button>
+          </div>
+          <div id="extKeysList"></div>
+        </div>
+
+        <!-- 3. Independent API Models & Scope Preset Groups -->
+        <div class="flex-between" style="margin: 20px 0 12px;">
+          <div>
+            <h3 style="font-size: 16px;">独立 API 模型与「组」可用范围预设编排</h3>
+            <p class="muted" style="margin: 3px 0 0;">
+              此处模型与客户端模型完全独立，设置方式一致（支持自定义模型名、上下文、模态、思考档位、多渠道路由、自定义组图标及手动排序）。
+            </p>
+          </div>
+          <div class="flex-row">
+            <button type="button" class="btn btn-outline btn-sm" id="importFromClientBtn">从客户端模型复制导入</button>
+            <button type="button" class="btn btn-outline btn-sm" id="addExtGroupBtn">+ 新建「组」范围预设</button>
+            <button type="button" class="btn btn-primary btn-sm" id="addExtModelBtn">+ 新增独立 API 模型</button>
+          </div>
+        </div>
+        <div id="extModelsList"></div>
+      </section>
+
+      <!-- TAB 3: PROVIDERS -->
+      <section id="tab-providers" class="hidden">
+        <div class="flex-between" style="margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 17px;">上游大模型 API 渠道池 (Magpie Aggregator)</h2>
+            <p class="muted" style="margin: 4px 0 0;">
+              统一接入 Anthropic、OpenAI、Google Gemini 及所有兼容接口 (DeepSeek、OpenRouter、SiliconFlow、Ollama、vLLM 等)，支持多 Key 轮询与上游模型自动探测。
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" id="addProviderBtn">+ 接入新 API 渠道</button>
+        </div>
+        <div id="providersList" class="grid-2"></div>
+      </section>
+
+      <!-- TAB 4: ZS CONFIG & TLS -->
+      <section id="tab-config" class="hidden">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="font-size: 15px; margin-bottom: 4px;">服务端无后缀 <code>ZS</code> 核心配置</h3>
+            <p class="muted" style="margin: 0 0 14px;">
+              路径: <code id="zsFilePath" style="font-size: 11px;"></code>
+            </p>
+            <form id="zsConfigForm">
+              <div class="grid-3">
+                <div class="form-group">
+                  <label>监听 IP (HOST)</label>
+                  <input type="text" id="cfgHost" class="mono" placeholder="0.0.0.0" />
+                </div>
+                <div class="form-group">
+                  <label>客户端与后台端口 (PORT)</label>
+                  <input type="number" id="cfgPort" class="mono" min="1" max="65535" />
+                </div>
+                <div class="form-group">
+                  <label>隐蔽管理路径 (ADMIN_PATH)</label>
+                  <input type="text" id="cfgAdminPath" class="mono" placeholder="/zs-admin" />
+                </div>
+              </div>
+              <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                  <label>管理员账号 (ADMIN_USER)</label>
+                  <input type="text" id="cfgAdminUser" class="mono" />
+                </div>
+                <div class="form-group">
+                  <label>管理员新密码 (留空则保持原密码不变)</label>
+                  <input type="password" id="cfgAdminPass" placeholder="••••••••" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>客户端连接密钥 (CLIENT_TOKEN · 留空则客户端仅填地址即可直连)</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="cfgClientToken" class="mono" placeholder="留空表示免密钥连接" />
+                  <button type="button" class="btn btn-outline btn-sm" id="genTokenBtn">随机生成</button>
+                </div>
+              </div>
+              <div class="card" style="background: #f8fafc; padding: 12px; margin-bottom: 14px;">
+                <div style="font-size: 11px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                  客户端安装目录 <code>ZS</code> 无后缀文件填写示例：
+                </div>
+                <pre id="clientZsPreview" style="margin: 0; font-size: 12px; color: #1e40af; white-space: pre-wrap;"></pre>
+              </div>
+              <button type="submit" class="btn btn-primary">保存至服务端 ZS 文件</button>
+              <span class="muted" style="margin-left: 10px;">注：修改客户端主端口/HTTPS 开关后重启服务端生效；独立 API 端口、客户端密钥与管理密码实时生效。</span>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 15px; margin-bottom: 4px;">HTTPS / TLS 域名证书配置</h3>
+            <p class="muted" style="margin: 0 0 14px;">
+              绑定域名正式 PEM 证书后，独立对外 API 服务与 HTTPS 客户端网关均自动免重启热加载该证书。
+            </p>
+            <div id="certStatusBox" class="card" style="background: #f8fafc; padding: 12px; margin-bottom: 14px; font-size: 12px;"></div>
+
+            <div class="form-group">
+              <label class="check-chip" style="width: fit-content;">
+                <input type="checkbox" id="cfgTlsEnabled" />
+                <span>客户端主端口启用 HTTPS / TLS (<code>TLS_ENABLED=true</code>)</span>
+              </label>
+            </div>
+            <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label>公钥证书链路径 (TLS_CERT_FILE)</label>
+                <input type="text" id="cfgCertFile" class="mono" />
+              </div>
+              <div class="form-group">
+                <label>私钥文件路径 (TLS_KEY_FILE)</label>
+                <input type="text" id="cfgKeyFile" class="mono" />
+              </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 14px 0;" />
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">方式一：粘贴并写入正式域名 PEM 证书 (Let's Encrypt / Cloudflare / Nginx PEM)</div>
+            <div class="form-group">
+              <label>证书链内容 (fullchain.pem)</label>
+              <textarea id="pemCertInput" rows="3" class="mono" placeholder="-----BEGIN CERTIFICATE-----..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>私钥内容 (privkey.pem)</label>
+              <textarea id="pemKeyInput" rows="3" class="mono" placeholder="-----BEGIN PRIVATE KEY-----..."></textarea>
+            </div>
+            <div class="flex-row" style="margin-bottom: 16px;">
+              <button type="button" class="btn btn-primary btn-sm" id="uploadPemBtn">验证并写入证书文件</button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 14px 0;" />
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">方式二：一键签发自签名测试证书</div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="selfSignHosts" class="mono" value="localhost, 127.0.0.1" placeholder="域名或 IP，逗号分隔，如 ai.example.com, 127.0.0.1" />
+              <button type="button" class="btn btn-outline btn-sm" id="genSelfCertBtn">生成自签名证书</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: LOGS -->
+      <section id="tab-logs" class="hidden">
+        <div class="flex-between" style="margin-bottom: 14px;">
+          <div class="flex-row">
+            <h2 style="font-size: 17px;">实时模型路由与调用审计</h2>
+            <div class="nav-tabs" style="margin-left: 8px;">
+              <button type="button" class="nav-tab active" id="logScopeClientBtn" onclick="switchLogScope('client')">客户端服务日志</button>
+              <button type="button" class="nav-tab" id="logScopeApiBtn" onclick="switchLogScope('api')">独立 API 服务日志</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" id="clearLogsBtn">清空当前日志</button>
+        </div>
+        <div class="card" style="padding: 0; overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th id="logAuthColHeader" class="hidden">调用 Key</th>
+                <th>请求模型</th>
+                <th>实际命中上游渠道 / 模型</th>
+                <th>思考档位</th>
+                <th>耗时</th>
+                <th>Tokens (入/出)</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- GROUP / PRESET MODAL (Client Group & API Scope Group) -->
+  <div id="groupModal" class="modal-backdrop hidden">
+    <form id="groupForm" class="modal-box" style="max-width: 560px;">
+      <div class="flex-between" style="margin-bottom: 14px;">
+        <h3 id="groupModalTitle">配置模型分组</h3>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('groupModal')">关闭</button>
+      </div>
+      <input type="hidden" id="grpScope" value="client" />
+      <input type="hidden" id="grpId" value="" />
+      <input type="hidden" id="grpSortOrder" value="0" />
+
+      <div class="form-group">
+        <label id="grpNameLabel">分组名称</label>
+        <input type="text" id="grpName" required placeholder="如 Anthropic Claude / ZEllion 旗舰组" />
+      </div>
+
+      <div class="form-group" id="grpDescWrap">
+        <label>范围预设说明 (可选)</label>
+        <input type="text" id="grpDesc" placeholder="备注该可用范围预设组的用途..." />
+      </div>
+
+      <div class="form-group">
+        <label>自定义分组图标 (支持导入 SVG、PNG、WebP、JPG、ICO 等图片，或直接粘贴 &lt;svg&gt; 代码)</label>
+        <div class="flex-row" style="margin-bottom: 8px;">
+          <div class="group-icon-box" style="width: 38px; height: 38px; border-radius: 9px;" id="grpIconPreview">
+            <span class="muted" style="font-size: 10px;">无</span>
+          </div>
+          <label class="btn btn-outline btn-sm" style="cursor: pointer;">
+            <span>导入 SVG / 图片文件...</span>
+            <input type="file" id="grpIconFile" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp,image/gif,image/x-icon,image/*" class="hidden" />
+          </label>
+          <button type="button" class="btn btn-outline btn-sm" id="grpClearIconBtn">清除图标</button>
+        </div>
+        <textarea id="grpIconData" rows="2" class="mono" placeholder="粘贴 <svg>...</svg> 或 data:image/svg+xml;base64,... (导入图片后自动填入)"></textarea>
+      </div>
+
+      <div class="form-group hidden" id="grpApiModelsWrap">
+        <label>本「组」可用范围包含的独立 API 模型 (可多选，绑定该组的 API Key 将自动获得所选模型权限)</label>
+        <div id="grpApiModelsChecks" class="flex-row" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; max-height: 180px; overflow-y: auto;"></div>
+      </div>
+
+      <div class="flex-between" style="margin-top: 18px;">
+        <span class="muted">保存后可在列表中拖拽或点击 ↑ / ↓ 自由排序</span>
+        <div class="flex-row">
+          <button type="button" class="btn btn-outline" onclick="closeModal('groupModal')">取消</button>
+          <button type="submit" class="btn btn-primary">保存分组</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div id="apiKeyModal" class="modal-backdrop hidden">
+    <form id="apiKeyForm" class="modal-box" style="max-width: 640px;">
+      <div class="flex-between" style="margin-bottom: 14px;">
+        <h3 id="apiKeyModalTitle">生成 / 配置对外 API Key</h3>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('apiKeyModal')">关闭</button>
+      </div>
+      <input type="hidden" id="akId" value="" />
+
+      <div class="grid-2" style="grid-template-columns: 1fr 1.5fr; gap: 12px;">
+        <div class="form-group">
+          <label>Key 备注名称</label>
+          <input type="text" id="akName" required placeholder="如：主力生产 Key / 研发组 A" />
+        </div>
+        <div class="form-group">
+          <label>服务端生成的访问密钥 (API Key)</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="akSecret" class="mono" readonly required />
+            <button type="button" class="btn btn-outline btn-sm" id="akCopyBtn">复制</button>
+            <button type="button" class="btn btn-outline btn-sm" id="akRegenBtn">重新生成</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="check-chip">
+          <input type="checkbox" id="akAllowAll" />
+          <span style="font-weight: 600;">允许调用全部已上架的独立 API 模型（不限制范围）</span>
+        </label>
+      </div>
+
+      <div id="akScopedControls">
+        <div class="form-group">
+          <label>方式一：按「组」可用范围预设授权（勾选预设组即可赋予组内全部模型权限）</label>
+          <div id="akGroupsChecks" class="flex-row" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;"></div>
+        </div>
+
+        <div class="form-group">
+          <label>方式二：单独勾选可使用的独立 API 模型（可与上方预设组叠加生效）</label>
+          <div id="akModelsChecks" class="flex-row" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; max-height: 190px; overflow-y: auto;"></div>
+        </div>
+      </div>
+
+      <div class="flex-between" style="margin-top: 16px;">
+        <label class="check-chip">
+          <input type="checkbox" id="akEnabled" checked />
+          <span>立即启用该 API Key</span>
+        </label>
+        <div class="flex-row">
+          <button type="button" class="btn btn-outline" onclick="closeModal('apiKeyModal')">取消</button>
+          <button type="submit" class="btn btn-primary">保存 API Key</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- PROVIDER MODAL -->
+  <div id="providerModal" class="modal-backdrop hidden">
+    <form id="providerForm" class="modal-box">
+      <div class="flex-between" style="margin-bottom: 14px;">
+        <h3 id="provModalTitle">配置上游 API 渠道</h3>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('providerModal')">关闭</button>
+      </div>
+      <input type="hidden" id="provId" />
+
+      <div class="form-group">
+        <label>快捷渠道模板</label>
+        <div class="flex-row">
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('openai','https://api.openai.com/v1','OpenAI Official')">OpenAI</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('anthropic','https://api.anthropic.com','Anthropic Claude')">Anthropic</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('gemini','https://generativelanguage.googleapis.com','Google Gemini')">Gemini</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('openai','https://api.deepseek.com/v1','DeepSeek')">DeepSeek</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('openai','https://openrouter.ai/api/v1','OpenRouter')">OpenRouter</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('openai','https://api.siliconflow.cn/v1','SiliconFlow')">硅基流动</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="fillPreset('openai','http://127.0.0.1:11434/v1','Ollama Local')">Ollama 本地</button>
+        </div>
+      </div>
+
+      <div class="grid-2" style="grid-template-columns: 1.3fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>渠道名称</label>
+          <input type="text" id="provName" required placeholder="例如：Anthropic 主力渠道" />
+        </div>
+        <div class="form-group">
+          <label>接口协议规范</label>
+          <select id="provProtocol">
+            <option value="openai">OpenAI Chat Completions (及所有兼容接口)</option>
+            <option value="openai-responses">OpenAI Responses API (/v1/responses)</option>
+            <option value="anthropic">Anthropic Messages API (/v1/messages)</option>
+            <option value="gemini">Google Gemini Native API (v1beta)</option>
+            <option value="sanctum-local">Sanctum Built-in Diagnostic (本地免Key联调)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Base URL (接口根地址)</label>
+        <input type="text" id="provBaseUrl" class="mono" required placeholder="https://api.openai.com/v1" />
+      </div>
+
+      <div class="form-group">
+        <label>API Key (支持填入多个 Key，用逗号或换行分隔自动轮询负载均衡)</label>
+        <textarea id="provApiKey" rows="2" class="mono" placeholder="sk-..."></textarea>
+      </div>
+
+      <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>上游代理 Proxy URL (可选)</label>
+          <input type="text" id="provProxy" class="mono" placeholder="http://127.0.0.1:7890" />
+        </div>
+        <div class="form-group">
+          <label>预设模型列表 (逗号分隔，或保存后点击「探测模型」)</label>
+          <input type="text" id="provModels" class="mono" placeholder="gpt-4.1, claude-sonnet-4-20250514" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>备注说明</label>
+        <input type="text" id="provNotes" placeholder="渠道用途备注..." />
+      </div>
+
+      <div class="flex-between" style="margin-top: 16px;">
+        <label class="check-chip">
+          <input type="checkbox" id="provEnabled" checked />
+          <span>立即启用该上游渠道</span>
+        </label>
+        <div class="flex-row">
+          <button type="button" class="btn btn-outline" onclick="closeModal('providerModal')">取消</button>
+          <button type="submit" class="btn btn-primary">保存渠道</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- MODEL MODAL (Shared for Client Models & Independent API Models) -->
+  <div id="modelModal" class="modal-backdrop hidden">
+    <form id="modelForm" class="modal-box">
+      <div class="flex-between" style="margin-bottom: 14px;">
+        <h3 id="modelModalTitle">编排模型配置</h3>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('modelModal')">关闭</button>
+      </div>
+      <input type="hidden" id="mdlScope" value="client" />
+      <input type="hidden" id="mdlSortOrder" value="0" />
+
+      <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label id="mdlIdLabel">模型唯一标识 (Model ID)</label>
+          <input type="text" id="mdlId" class="mono" required placeholder="如 zellion-pro-v1" />
+        </div>
+        <div class="form-group">
+          <label>显示名称 (Display Name)</label>
+          <input type="text" id="mdlDisplayName" required placeholder="如 ZEllion Sovereign · 旗舰版" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>所属分组 (显示分组自定义图标并参与组内排序)</label>
+          <select id="mdlGroupId"></select>
+        </div>
+        <div class="form-group">
+          <label>厂商标识 (Provider Label)</label>
+          <input type="text" id="mdlProviderLabel" placeholder="如 ZEllion / Anthropic / OpenAI" />
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="form-group">
+          <label>上下文窗口上限 (Tokens)</label>
+          <input type="number" id="mdlContext" class="mono" value="128000" step="1000" required />
+        </div>
+        <div class="form-group">
+          <label>单次最大输出 (Max Output)</label>
+          <input type="number" id="mdlMaxOut" class="mono" value="16384" step="512" required />
+        </div>
+        <div class="form-group">
+          <label>默认思考档位</label>
+          <select id="mdlDefaultThink">
+            <option value="off">Off (关闭)</option>
+            <option value="low">Low (低)</option>
+            <option value="medium" selected>Medium (中)</option>
+            <option value="high">High (高)</option>
+            <option value="extra">Extra (超高)</option>
+            <option value="max">Max (极高)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>允许使用的多模态与能力开关 (Modalities)</label>
+        <div class="flex-row">
+          <label class="check-chip"><input type="checkbox" id="modText" checked /> 文本 (Text)</label>
+          <label class="check-chip"><input type="checkbox" id="modVision" /> 视觉图像 (Vision)</label>
+          <label class="check-chip"><input type="checkbox" id="modAudio" /> 音频理解 (Audio)</label>
+          <label class="check-chip"><input type="checkbox" id="modPdf" /> PDF 文档 (Document)</label>
+          <label class="check-chip"><input type="checkbox" id="modTools" checked /> 工具调用 / MCP (Tools)</label>
+          <label class="check-chip"><input type="checkbox" id="modReasoning" checked /> 深度思考链 (Reasoning)</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>可选思考深度档位 (Supported Thinking Levels)</label>
+        <div class="flex-row" id="thinkLevelsGroup">
+          <label class="check-chip"><input type="checkbox" value="off" /> Off</label>
+          <label class="check-chip"><input type="checkbox" value="low" checked /> Low</label>
+          <label class="check-chip"><input type="checkbox" value="medium" checked /> Medium</label>
+          <label class="check-chip"><input type="checkbox" value="high" checked /> High</label>
+          <label class="check-chip"><input type="checkbox" value="extra" /> Extra</label>
+          <label class="check-chip"><input type="checkbox" value="max" /> Max</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="flex-between" style="margin-bottom: 6px;">
+          <label style="margin: 0;">Magpie 上游渠道路由映射 (优先级越小越先调用；同优先级按权重负载均衡；失败自动容灾切换)</label>
+          <button type="button" class="btn btn-outline btn-sm" id="addRouteRowBtn">+ 添加路由节点</button>
+        </div>
+        <div id="routesContainer"></div>
+      </div>
+
+      <div class="grid-2" style="grid-template-columns: 2fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>服务端系统提示词前缀注入 (可选，调用方不可见)</label>
+          <input type="text" id="mdlSysPrefix" placeholder="可选：为该模型注入全局系统提示词..." />
+        </div>
+        <div class="form-group">
+          <label>模型简介</label>
+          <input type="text" id="mdlDesc" placeholder="管理端备注..." />
+        </div>
+      </div>
+
+      <div class="flex-between" style="margin-top: 16px;">
+        <label class="check-chip">
+          <input type="checkbox" id="mdlEnabled" checked />
+          <span id="mdlEnabledLabel">启用并公开上架该模型</span>
+        </label>
+        <div class="flex-row">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modelModal')">取消</button>
+          <button type="submit" class="btn btn-primary">保存模型配置</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const BASE_PATH = window.location.pathname.replace(/\/+$/, '');
+    let token = sessionStorage.getItem('zs_admin_token') || '';
+    let currentLogScope = 'client';
+    let appData = {
+      providers: [],
+      modelGroups: [],
+      models: [],
+      logs: [],
+      apiConfig: { enabled: false, httpsPort: 443, httpPort: 80, redirectHttp80: true },
+      apiStatus: {},
+      apiGroups: [],
+      apiModels: [],
+      apiKeys: [],
+      apiLogs: [],
+      zsConfig: {},
+      certInfo: {}
+    };
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.add('hidden'), 2600);
+    }
+
+    async function api(path, opts = {}) {
+      const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(BASE_PATH + path, Object.assign({}, opts, { headers }));
+      if (res.status === 401) {
+        token = '';
+        sessionStorage.removeItem('zs_admin_token');
+        document.getElementById('consoleView').classList.add('hidden');
+        document.getElementById('loginView').classList.remove('hidden');
+        throw new Error('登录已过期，请重新验证');
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      return data;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function normalizeIconPreviewSrc(raw) {
+      const s = String(raw || '').trim();
+      if (!s) return '';
+      if (s.startsWith('data:image/') || s.startsWith('https://') || s.startsWith('http://')) return s;
+      if (s.toLowerCase().startsWith('<svg') || s.toLowerCase().startsWith('<?xml')) {
+        return 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+      }
+      return '';
+    }
+
+    function renderIconTag(icon, fallback = '◈') {
+      const src = normalizeIconPreviewSrc(icon);
+      if (src) return `<img src="${escapeHtml(src)}" alt="" />`;
+      return `<span style="font-size:12px;color:#64748b;">${fallback}</span>`;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('loginErr');
+      errEl.classList.add('hidden');
+      try {
+        const res = await api('/api/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: document.getElementById('loginUser').value.trim(),
+            password: document.getElementById('loginPass').value
+          })
+        });
+        token = res.token;
+        sessionStorage.setItem('zs_admin_token', token);
+        document.getElementById('loginPass').value = '';
+        await loadOverview();
+      } catch (err) {
+        errEl.textContent = err.message || '账号或密码错误';
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      token = '';
+      sessionStorage.removeItem('zs_admin_token');
+      location.reload();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', () => loadOverview(true));
+
+    document.querySelectorAll('header .nav-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('header .nav-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        ['models', 'extapi', 'providers', 'config', 'logs'].forEach(t => {
+          document.getElementById('tab-' + t).classList.toggle('hidden', t !== target);
+        });
+      });
+    });
+
+    async function loadOverview(notify = false) {
+      try {
+        appData = await api('/api/overview');
+        document.getElementById('loginView').classList.add('hidden');
+        document.getElementById('consoleView').classList.remove('hidden');
+        renderAll();
+        if (notify) showToast('已同步最新网关状态');
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+
+    function renderAll() {
+      const tlsBadge = document.getElementById('tlsBadge');
+      if (appData.zsConfig?.tlsEnabled) {
+        tlsBadge.textContent = '客户端网关: HTTPS';
+        tlsBadge.className = 'pill pill-green mono';
+      } else {
+        tlsBadge.textContent = '客户端网关: HTTP';
+        tlsBadge.className = 'pill pill-blue mono';
+      }
+
+      const apiBadge = document.getElementById('extApiTopBadge');
+      const st = appData.apiStatus || {};
+      if (st.enabled && st.running) {
+        apiBadge.textContent = `对外 API: HTTPS :${st.httpsPort}`;
+        apiBadge.className = 'pill pill-green mono';
+      } else if (st.enabled && !st.running) {
+        apiBadge.textContent = '对外 API: 监听异常';
+        apiBadge.className = 'pill pill-red mono';
+      } else {
+        apiBadge.textContent = '对外 API: 未启用';
+        apiBadge.className = 'pill pill-gray mono';
+      }
+
+      renderGroupedCatalog('client');
+      renderExtApiTab();
+      renderProviders();
+      renderConfig();
+      renderLogs();
+    }
+
+    // ======================= GROUPED & MANUALLY SORTABLE CATALOG RENDERER =======================
+
+    function buildBuckets(scope) {
+      const groups = (scope === 'client' ? appData.modelGroups : appData.apiGroups) || [];
+      const models = (scope === 'client' ? appData.models : appData.apiModels) || [];
+      const gMap = new Map();
+      const buckets = groups.map(g => {
+        const b = { group: g, models: [] };
+        gMap.set(g.id, b);
+        return b;
+      });
+      const ungrouped = [];
+      models.forEach(m => {
+        if (m.groupId && gMap.has(m.groupId)) {
+          gMap.get(m.groupId).models.push(m);
+        } else {
+          ungrouped.push(m);
+        }
+      });
+      return { buckets, ungrouped };
+    }
+
+    function renderModelCardHtml(scope, m, idx, totalInBucket, bucketGroupId, provMap) {
+      const mods = [];
+      if (m.modalities?.text) mods.push('Text');
+      if (m.modalities?.vision) mods.push('Vision');
+      if (m.modalities?.audio) mods.push('Audio');
+      if (m.modalities?.pdf) mods.push('PDF');
+      if (m.modalities?.tools) mods.push('Tools');
+      if (m.modalities?.reasoning) mods.push('Reasoning');
+
+      const routeBadges = (m.routes || []).map(r => {
+        const p = provMap[r.providerId];
+        const active = p && p.enabled;
+        return `<span class="pill ${active ? 'pill-blue' : 'pill-gray'} mono" style="margin-right:4px;">P${r.priority} · ${escapeHtml(p ? p.name : r.providerId)} → ${escapeHtml(r.upstreamModel)} (w:${r.weight})</span>`;
+      }).join('');
+
+      const statusText = m.enabled ? (scope === 'client' ? '客户端已上架' : 'API 已启用') : '已隐藏';
+
+      return `
+        <div class="model-item"
+             draggable="true"
+             data-drag-kind="model"
+             data-scope="${scope}"
+             data-model-id="${escapeHtml(m.id)}"
+             data-group-id="${escapeHtml(bucketGroupId)}">
+          <div class="flex-between">
+            <div class="flex-row">
+              <span class="drag-handle" title="拖拽排序或移入其他分组">⋮⋮</span>
+              <span style="font-size:14px;font-weight:700;">${escapeHtml(m.displayName)}</span>
+              <code class="pill pill-gray">${escapeHtml(m.id)}</code>
+              <span class="pill ${m.enabled ? 'pill-green' : 'pill-gray'}">${statusText}</span>
+              <span class="pill pill-amber mono">${Math.round((m.contextWindow || 128000)/1000)}K / ${m.maxOutputTokens}</span>
+            </div>
+            <div class="flex-row">
+              <button type="button" class="btn btn-outline btn-xs" ${idx === 0 ? 'disabled' : ''} title="上移" onclick="moveModelOrder('${scope}','${escapeHtml(bucketGroupId)}','${escapeHtml(m.id)}',-1)">↑</button>
+              <button type="button" class="btn btn-outline btn-xs" ${idx === totalInBucket - 1 ? 'disabled' : ''} title="下移" onclick="moveModelOrder('${scope}','${escapeHtml(bucketGroupId)}','${escapeHtml(m.id)}',1)">↓</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="toggleModelQuick('${scope}','${escapeHtml(m.id)}')">${m.enabled ? '下架' : '上架'}</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="openEditModel('${scope}','${escapeHtml(m.id)}')">编辑</button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="deleteModelByScope('${scope}','${escapeHtml(m.id)}')">删除</button>
+            </div>
+          </div>
+          ${m.description ? `<div class="muted" style="margin-top:5px;">${escapeHtml(m.description)}</div>` : ''}
+          <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
+            ${mods.map(x => `<span class="pill pill-green">${x}</span>`).join('')}
+            <code style="font-size:11px;color:#475569;margin-left:6px;">思考: ${escapeHtml((m.supportedThinkingLevels || []).join('/'))} (默认 ${escapeHtml(m.defaultThinkingLevel)})</code>
+          </div>
+          <div style="margin-top:7px;">
+            <span class="muted">路由：</span>${routeBadges || '<span class="pill pill-red">未绑定路由</span>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGroupedCatalog(scope) {
+      const containerId = scope === 'client' ? 'modelsList' : 'extModelsList';
+      const box = document.getElementById(containerId);
+      const provMap = {};
+      (appData.providers || []).forEach(p => provMap[p.id] = p);
+
+      const { buckets, ungrouped } = buildBuckets(scope);
+      if (buckets.length === 0 && ungrouped.length === 0) {
+        box.innerHTML = `<div class="card muted">${
+          scope === 'client'
+            ? '尚未创建客户端分组或模型，请点击右上角新建模型分组或发布客户端模型。'
+            : '尚未配置独立 API 模型或「组」可用范围预设，请点击上方按钮创建（也可一键从客户端模型复制导入）。'
+        }</div>`;
+        return;
+      }
+
+      let html = buckets.map((b, gIdx) => {
+        const g = b.group;
+        const presetCountInfo = scope === 'api' && Array.isArray(g.modelIds)
+          ? `<span class="pill pill-blue">预设可用范围: ${g.modelIds.length} 个模型</span>`
+          : '';
+        return `
+          <div class="group-card"
+               draggable="true"
+               data-drag-kind="group"
+               data-scope="${scope}"
+               data-group-id="${escapeHtml(g.id)}">
+            <div class="flex-between">
+              <div class="flex-row">
+                <span class="drag-handle" title="拖拽调整分组顺序">⋮⋮</span>
+                <span class="group-icon-box">${renderIconTag(g.icon)}</span>
+                <strong style="font-size:15px;">${escapeHtml(g.name)}</strong>
+                <span class="pill pill-gray">${b.models.length} 个组内模型</span>
+                ${presetCountInfo}
+                ${g.description ? `<span class="muted">${escapeHtml(g.description)}</span>` : ''}
+              </div>
+              <div class="flex-row">
+                <button type="button" class="btn btn-outline btn-xs" ${gIdx === 0 ? 'disabled' : ''} title="分组上移" onclick="moveGroupOrder('${scope}','${escapeHtml(g.id)}',-1)">↑ 组上移</button>
+                <button type="button" class="btn btn-outline btn-xs" ${gIdx === buckets.length - 1 ? 'disabled' : ''} title="分组下移" onclick="moveGroupOrder('${scope}','${escapeHtml(g.id)}',1)">↓ 组下移</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openCreateModel('${scope}','${escapeHtml(g.id)}')">+ 组内加模型</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openEditGroup('${scope}','${escapeHtml(g.id)}')">编辑组 / 图标</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteGroup('${scope}','${escapeHtml(g.id)}')">删除组</button>
+              </div>
+            </div>
+            <div>
+              ${
+                b.models.length === 0
+                  ? `<div class="muted" style="padding:10px 4px 2px;">本组暂无归属模型，可点击「+ 组内加模型」或将下方模型拖入此处。</div>`
+                  : b.models.map((m, idx) => renderModelCardHtml(scope, m, idx, b.models.length, g.id, provMap)).join('')
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (ungrouped.length > 0 || buckets.length > 0) {
+        html += `
+          <div class="group-card"
+               style="background: rgba(255,255,255,0.75); border-style: dashed;"
+               data-drag-kind="ungrouped-zone"
+               data-scope="${scope}"
+               data-group-id="__ungrouped__">
+            <div class="flex-between">
+              <div class="flex-row">
+                <strong style="font-size:14px;color:#475569;">未分组模型 (${ungrouped.length})</strong>
+                <span class="muted">可拖拽至上方任意分组，或在下方调整未分组模型顺序</span>
+              </div>
+            </div>
+            <div>
+              ${
+                ungrouped.length === 0
+                  ? '<div class="muted" style="padding:6px 2px 0;">全部模型均已归入分组（将模型拖到此处可移出分组）。</div>'
+                  : ungrouped.map((m, idx) => renderModelCardHtml(scope, m, idx, ungrouped.length, '__ungrouped__', provMap)).join('')
+              }
+            </div>
+          </div>
+        `;
+      }
+
+      box.innerHTML = html;
+      attachDragAndDropHandlers(box, scope);
+    }
+
+    async function persistCatalogOrder(scope, buckets, ungrouped) {
+      const groupIds = buckets.map(b => b.group.id);
+      const groupModels = {};
+      buckets.forEach(b => {
+        if (scope === 'api') {
+          // Preserve preset models from other groups while ordering primary models in this group first
+          const orderedPrimary = b.models.map(m => m.id);
+          const extraPreset = (b.group.modelIds || []).filter(id => !orderedPrimary.includes(id));
+          groupModels[b.group.id] = [...orderedPrimary, ...extraPreset];
+        } else {
+          groupModels[b.group.id] = b.models.map(m => m.id);
+        }
+      });
+      groupModels['__ungrouped__'] = ungrouped.map(m => m.id);
+
+      const endpoint = scope === 'client' ? '/api/models/reorder' : '/api/ext-api/reorder';
+      await api(endpoint, {
+        method: 'POST',
+        body: JSON.stringify({ groupIds, groupModels })
+      });
+      await loadOverview();
+      showToast('分组与模型排序已保存');
+    }
+
+    window.moveGroupOrder = async function(scope, groupId, delta) {
+      const { buckets, ungrouped } = buildBuckets(scope);
+      const idx = buckets.findIndex(b => b.group.id === groupId);
+      const nextIdx = idx + delta;
+      if (idx < 0 || nextIdx < 0 || nextIdx >= buckets.length) return;
+      const tmp = buckets[idx];
+      buckets[idx] = buckets[nextIdx];
+      buckets[nextIdx] = tmp;
+      await persistCatalogOrder(scope, buckets, ungrouped);
+    };
+
+    window.moveModelOrder = async function(scope, bucketGroupId, modelId, delta) {
+      const { buckets, ungrouped } = buildBuckets(scope);
+      const list = bucketGroupId === '__ungrouped__'
+        ? ungrouped
+        : (buckets.find(b => b.group.id === bucketGroupId)?.models || []);
+      const idx = list.findIndex(m => m.id === modelId);
+      const nextIdx = idx + delta;
+      if (idx < 0 || nextIdx < 0 || nextIdx >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[nextIdx];
+      list[nextIdx] = tmp;
+      await persistCatalogOrder(scope, buckets, ungrouped);
+    };
+
+    let dragState = null;
+
+    function attachDragAndDropHandlers(container, scope) {
+      container.querySelectorAll('[draggable="true"]').forEach(el => {
+        el.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          dragState = {
+            kind: el.dataset.dragKind,
+            scope: el.dataset.scope,
+            groupId: el.dataset.groupId,
+            modelId: el.dataset.modelId || ''
+          };
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        el.addEventListener('dragend', () => {
+          dragState = null;
+          container.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+        });
+      });
+
+      container.querySelectorAll('.model-item').forEach(itemEl => {
+        itemEl.addEventListener('dragover', (e) => {
+          if (!dragState || dragState.scope !== scope || dragState.kind !== 'model') return;
+          e.preventDefault();
+          e.stopPropagation();
+          itemEl.classList.add('drag-over');
+        });
+        itemEl.addEventListener('dragleave', () => itemEl.classList.remove('drag-over'));
+        itemEl.addEventListener('drop', async (e) => {
+          if (!dragState || dragState.scope !== scope || dragState.kind !== 'model') return;
+          e.preventDefault();
+          e.stopPropagation();
+          itemEl.classList.remove('drag-over');
+          const targetModelId = itemEl.dataset.modelId;
+          const targetGroupId = itemEl.dataset.groupId;
+          if (targetModelId === dragState.modelId) return;
+
+          const { buckets, ungrouped } = buildBuckets(scope);
+          let moved = null;
+          const removeFrom = (arr) => {
+            const i = arr.findIndex(m => m.id === dragState.modelId);
+            if (i >= 0) moved = arr.splice(i, 1)[0];
+          };
+          buckets.forEach(b => removeFrom(b.models));
+          removeFrom(ungrouped);
+          if (!moved) return;
+
+          const destList = targetGroupId === '__ungrouped__'
+            ? ungrouped
+            : (buckets.find(b => b.group.id === targetGroupId)?.models || ungrouped);
+          const destIdx = destList.findIndex(m => m.id === targetModelId);
+          if (destIdx >= 0) destList.splice(destIdx, 0, moved);
+          else destList.push(moved);
+
+          await persistCatalogOrder(scope, buckets, ungrouped);
+        });
+      });
+
+      container.querySelectorAll('.group-card').forEach(grpEl => {
+        grpEl.addEventListener('dragover', (e) => {
+          if (!dragState || dragState.scope !== scope) return;
+          if (dragState.kind === 'group' && grpEl.dataset.dragKind !== 'group') return;
+          e.preventDefault();
+          grpEl.classList.add('drag-over');
+        });
+        grpEl.addEventListener('dragleave', () => grpEl.classList.remove('drag-over'));
+        grpEl.addEventListener('drop', async (e) => {
+          if (!dragState || dragState.scope !== scope) return;
+          e.preventDefault();
+          grpEl.classList.remove('drag-over');
+          const targetGroupId = grpEl.dataset.groupId;
+          const { buckets, ungrouped } = buildBuckets(scope);
+
+          if (dragState.kind === 'group' && grpEl.dataset.dragKind === 'group') {
+            if (dragState.groupId === targetGroupId) return;
+            const fromIdx = buckets.findIndex(b => b.group.id === dragState.groupId);
+            const toIdx = buckets.findIndex(b => b.group.id === targetGroupId);
+            if (fromIdx < 0 || toIdx < 0) return;
+            const [movedGrp] = buckets.splice(fromIdx, 1);
+            buckets.splice(toIdx, 0, movedGrp);
+            await persistCatalogOrder(scope, buckets, ungrouped);
+          } else if (dragState.kind === 'model') {
+            let moved = null;
+            buckets.forEach(b => {
+              const i = b.models.findIndex(m => m.id === dragState.modelId);
+              if (i >= 0) moved = b.models.splice(i, 1)[0];
+            });
+            const uIdx = ungrouped.findIndex(m => m.id === dragState.modelId);
+            if (uIdx >= 0) moved = ungrouped.splice(uIdx, 1)[0];
+            if (!moved) return;
+
+            if (targetGroupId === '__ungrouped__') {
+              ungrouped.push(moved);
+            } else {
+              const destB = buckets.find(b => b.group.id === targetGroupId);
+              if (destB) destB.models.push(moved);
+            }
+            await persistCatalogOrder(scope, buckets, ungrouped);
+          }
+        });
+      });
+    }
+
+    // ======================= GROUP MODAL & ICON IMPORT =======================
+
+    function updateGroupIconPreview() {
+      const box = document.getElementById('grpIconPreview');
+      const raw = document.getElementById('grpIconData').value.trim();
+      const src = normalizeIconPreviewSrc(raw);
+      if (src) {
+        box.innerHTML = `<img src="${escapeHtml(src)}" alt="" style="width:28px;height:28px;object-fit:contain;" />`;
+      } else {
+        box.innerHTML = `<span class="muted" style="font-size:10px;">无</span>`;
+      }
+    }
+
+    document.getElementById('grpIconData').addEventListener('input', updateGroupIconPreview);
+    document.getElementById('grpClearIconBtn').addEventListener('click', () => {
+      document.getElementById('grpIconData').value = '';
+      document.getElementById('grpIconFile').value = '';
+      updateGroupIconPreview();
+    });
+
+    document.getElementById('grpIconFile').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 1024 * 1024) {
+        alert('图标文件请控制在 1 MB 以内');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          document.getElementById('grpIconData').value = reader.result;
+          updateGroupIconPreview();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function populateApiModelsChecksInGroupModal(selectedIds = []) {
+      const box = document.getElementById('grpApiModelsChecks');
+      const list = appData.apiModels || [];
+      if (list.length === 0) {
+        box.innerHTML = '<span class="muted">尚未添加独立 API 模型，可先保存分组后再添加模型。</span>';
+        return;
+      }
+      box.innerHTML = list.map(m => `
+        <label class="check-chip">
+          <input type="checkbox" value="${escapeHtml(m.id)}" ${selectedIds.includes(m.id) ? 'checked' : ''} />
+          <span>${escapeHtml(m.displayName)} <code style="font-size:11px;color:#64748b;">(${escapeHtml(m.id)})</code></span>
+        </label>
+      `).join('');
+    }
+
+    function openCreateGroup(scope) {
+      document.getElementById('grpScope').value = scope;
+      document.getElementById('grpId').value = '';
+      document.getElementById('grpSortOrder').value = '0';
+      document.getElementById('grpName').value = '';
+      document.getElementById('grpDesc').value = '';
+      document.getElementById('grpIconData').value = '';
+      document.getElementById('grpIconFile').value = '';
+      updateGroupIconPreview();
+
+      const isApi = scope === 'api';
+      document.getElementById('groupModalTitle').textContent = isApi ? '新建对外 API「组」可用范围预设' : '新建客户端模型分组';
+      document.getElementById('grpNameLabel').textContent = isApi ? '预设组名称' : '客户端分组名称';
+      document.getElementById('grpDescWrap').classList.toggle('hidden', !isApi);
+      document.getElementById('grpApiModelsWrap').classList.toggle('hidden', !isApi);
+      if (isApi) populateApiModelsChecksInGroupModal([]);
+
+      document.getElementById('groupModal').classList.remove('hidden');
+    }
+
+    window.openEditGroup = function(scope, id) {
+      const list = scope === 'client' ? (appData.modelGroups || []) : (appData.apiGroups || []);
+      const g = list.find(x => x.id === id);
+      if (!g) return;
+      document.getElementById('grpScope').value = scope;
+      document.getElementById('grpId').value = g.id;
+      document.getElementById('grpSortOrder').value = g.sortOrder ?? 0;
+      document.getElementById('grpName').value = g.name || '';
+      document.getElementById('grpDesc').value = g.description || '';
+      document.getElementById('grpIconData').value = g.icon || '';
+      document.getElementById('grpIconFile').value = '';
+      updateGroupIconPreview();
+
+      const isApi = scope === 'api';
+      document.getElementById('groupModalTitle').textContent = isApi ? '编辑「组」可用范围预设与图标' : '编辑客户端模型分组与图标';
+      document.getElementById('grpNameLabel').textContent = isApi ? '预设组名称' : '客户端分组名称';
+      document.getElementById('grpDescWrap').classList.toggle('hidden', !isApi);
+      document.getElementById('grpApiModelsWrap').classList.toggle('hidden', !isApi);
+      if (isApi) populateApiModelsChecksInGroupModal(g.modelIds || []);
+
+      document.getElementById('groupModal').classList.remove('hidden');
+    };
+
+    document.getElementById('addClientGroupBtn').addEventListener('click', () => openCreateGroup('client'));
+    document.getElementById('addExtGroupBtn').addEventListener('click', () => openCreateGroup('api'));
+
+    document.getElementById('groupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const scope = document.getElementById('grpScope').value;
+      const payload = {
+        id: document.getElementById('grpId').value,
+        name: document.getElementById('grpName').value.trim(),
+        icon: document.getElementById('grpIconData').value.trim(),
+        sortOrder: Number(document.getElementById('grpSortOrder').value) || 0
+      };
+      if (scope === 'api') {
+        payload.description = document.getElementById('grpDesc').value.trim();
+        const mids = [];
+        document.querySelectorAll('#grpApiModelsChecks input:checked').forEach(cb => mids.push(cb.value));
+        payload.modelIds = mids;
+      }
+
+      try {
+        await api(scope === 'client' ? '/api/model-groups' : '/api/ext-api/groups', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        closeModal('groupModal');
+        showToast('分组已保存');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    window.deleteGroup = async function(scope, id) {
+      if (!confirm('确认删除该分组？（组内模型不会被删除，将自动移至未分组）')) return;
+      const ep = scope === 'client' ? '/api/model-groups?id=' : '/api/ext-api/groups?id=';
+      await api(ep + encodeURIComponent(id), { method: 'DELETE' });
+      showToast('分组已删除');
+      await loadOverview();
+    };
+
+    // ======================= INDEPENDENT EXTERNAL HTTPS API TAB =======================
+
+    function renderExtApiTab() {
+      const cfg = appData.apiConfig || { enabled: false, httpsPort: 443, httpPort: 80, redirectHttp80: true };
+      const st = appData.apiStatus || {};
+      document.getElementById('extApiEnabled').checked = !!cfg.enabled;
+      document.getElementById('extApiHttpsPort').value = cfg.httpsPort || 443;
+      document.getElementById('extApiGuard80').checked = cfg.redirectHttp80 !== false;
+
+      const statusBox = document.getElementById('extApiRuntimeStatus');
+      if (st.enabled && st.running) {
+        statusBox.innerHTML = `<span class="pill pill-green mono">● 运行中 · HTTPS :${st.httpsPort}${st.httpGuardOn ? ' (80端口明文拦截已就绪)' : ''}</span>`;
+      } else if (st.enabled && !st.running) {
+        statusBox.innerHTML = `<span class="pill pill-red">● 启动失败: ${escapeHtml(st.lastError || '端口不可用')}</span>`;
+      } else {
+        statusBox.innerHTML = `<span class="pill pill-gray">● 当前未开启</span>`;
+      }
+
+      const host = location.hostname || 'ai.yourdomain.com';
+      const portSuffix = Number(cfg.httpsPort || 443) === 443 ? '' : `:${cfg.httpsPort}`;
+      const baseDomain = `https://${host}${portSuffix}`;
+      document.getElementById('extApiEndpointGuide').innerHTML = [
+        `• 直接输入域名 Base URL: <strong>${escapeHtml(baseDomain)}</strong> 或 <strong>${escapeHtml(baseDomain)}/v1</strong>`,
+        `• OpenAI Chat / Responses: POST ${escapeHtml(baseDomain)}/v1/chat/completions · POST ${escapeHtml(baseDomain)}/v1/responses`,
+        `• Anthropic Messages: POST ${escapeHtml(baseDomain)}/v1/messages (Header: x-api-key 或 Authorization: Bearer)`,
+        `• 模型列表查询: GET ${escapeHtml(baseDomain)}/v1/models`
+      ].join('<br/>');
+
+      renderExtKeys();
+      renderGroupedCatalog('api');
+    }
+
+    document.getElementById('extApiConfigForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const res = await api('/api/ext-api/config', {
+          method: 'PUT',
+          body: JSON.stringify({
+            enabled: document.getElementById('extApiEnabled').checked,
+            httpsPort: Number(document.getElementById('extApiHttpsPort').value) || 443,
+            httpPort: 80,
+            redirectHttp80: document.getElementById('extApiGuard80').checked
+          })
+        });
+        await loadOverview();
+        if (res.apiStatus?.enabled && !res.apiStatus?.running) {
+          alert('配置已保存，但 HTTPS 端口监听未成功：' + (res.apiStatus.lastError || '请检查端口占用或权限'));
+        } else {
+          showToast('独立 HTTPS API 服务设置已热更新生效');
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    function renderExtKeys() {
+      const box = document.getElementById('extKeysList');
+      const keys = appData.apiKeys || [];
+      if (keys.length === 0) {
+        box.innerHTML = '<div class="muted" style="padding:10px 2px;">尚未生成任何 API Key，请点击右上角「+ 生成新 API Key」。</div>';
+        return;
+      }
+
+      const grpMap = {};
+      (appData.apiGroups || []).forEach(g => grpMap[g.id] = g);
+      const mdlMap = {};
+      (appData.apiModels || []).forEach(m => mdlMap[m.id] = m);
+
+      box.innerHTML = keys.map(k => {
+        let scopeHtml = '';
+        if (k.allowAllModels) {
+          scopeHtml = '<span class="pill pill-blue">全部已启用 API 模型</span>';
+        } else {
+          const gPills = (k.groupIds || []).map(gid => {
+            const g = grpMap[gid];
+            if (!g) return '';
+            const iconSrc = normalizeIconPreviewSrc(g.icon);
+            return `<span class="pill pill-blue">${iconSrc ? `<img src="${escapeHtml(iconSrc)}" alt=""/>` : ''}组: ${escapeHtml(g.name)}</span>`;
+          }).join(' ');
+          const mPills = (k.allowedModels || []).map(mid => {
+            const m = mdlMap[mid];
+            return `<span class="pill pill-gray mono">${escapeHtml(m ? m.displayName : mid)}</span>`;
+          }).join(' ');
+          scopeHtml = (gPills + ' ' + mPills).trim() || '<span class="pill pill-red">未分配可用模型范围</span>';
+        }
+
+        return `
+          <div class="model-item" style="margin-top:8px;">
+            <div class="flex-between">
+              <div class="flex-row">
+                <strong style="font-size:14px;">${escapeHtml(k.name)}</strong>
+                <code class="pill pill-gray">${escapeHtml(k.keyPrefix || '')}</code>
+                <span class="pill ${k.enabled ? 'pill-green' : 'pill-gray'}">${k.enabled ? '已启用' : '已禁用'}</span>
+                <span class="muted">调用 ${k.requestCount || 0} 次${k.lastUsedAt ? ' · 最近 ' + escapeHtml(k.lastUsedAt) : ''}</span>
+              </div>
+              <div class="flex-row">
+                <button type="button" class="btn btn-outline btn-sm" onclick="copyExtKey('${escapeHtml(k.id)}')">复制 Key</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="regenExtKey('${escapeHtml(k.id)}')">重置密钥</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleExtKey('${escapeHtml(k.id)}')">${k.enabled ? '停用' : '启用'}</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openEditExtKey('${escapeHtml(k.id)}')">编辑范围</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteExtKey('${escapeHtml(k.id)}')">删除</button>
+              </div>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+              <span class="muted">授权范围：</span>${scopeHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function populateExtKeyScopeControls(selectedGroups = [], selectedModels = [], allowAll = false) {
+      document.getElementById('akAllowAll').checked = !!allowAll;
+      document.getElementById('akScopedControls').classList.toggle('hidden', !!allowAll);
+
+      const gBox = document.getElementById('akGroupsChecks');
+      const groups = appData.apiGroups || [];
+      if (groups.length === 0) {
+        gBox.innerHTML = '<span class="muted">暂无「组」预设，可在下方点击「+ 新建组范围预设」建立。</span>';
+      } else {
+        gBox.innerHTML = groups.map(g => {
+          const iconSrc = normalizeIconPreviewSrc(g.icon);
+          return `
+            <label class="check-chip">
+              <input type="checkbox" value="${escapeHtml(g.id)}" ${selectedGroups.includes(g.id) ? 'checked' : ''} />
+              ${iconSrc ? `<img src="${escapeHtml(iconSrc)}" alt="" />` : ''}
+              <span>${escapeHtml(g.name)} <span class="muted">(${(g.modelIds || []).length})</span></span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const mBox = document.getElementById('akModelsChecks');
+      const models = appData.apiModels || [];
+      if (models.length === 0) {
+        mBox.innerHTML = '<span class="muted">暂无独立 API 模型，请先在下方添加模型。</span>';
+      } else {
+        mBox.innerHTML = models.map(m => `
+          <label class="check-chip">
+            <input type="checkbox" value="${escapeHtml(m.id)}" ${selectedModels.includes(m.id) ? 'checked' : ''} />
+            <span>${escapeHtml(m.displayName)} <code style="font-size:11px;color:#64748b;">(${escapeHtml(m.id)})</code></span>
+          </label>
+        `).join('');
+      }
+    }
+
+    document.getElementById('akAllowAll').addEventListener('change', (e) => {
+      document.getElementById('akScopedControls').classList.toggle('hidden', e.target.checked);
+    });
+
+    document.getElementById('addExtKeyBtn').addEventListener('click', async () => {
+      document.getElementById('akId').value = '';
+      document.getElementById('akName').value = '';
+      document.getElementById('akEnabled').checked = true;
+      document.getElementById('apiKeyModalTitle').textContent = '生成新对外 API Key';
+      populateExtKeyScopeControls([], [], false);
+      const gen = await api('/api/ext-api/keys/generate', { method: 'POST' });
+      document.getElementById('akSecret').value = gen.key || '';
+      document.getElementById('apiKeyModal').classList.remove('hidden');
+    });
+
+    window.openEditExtKey = function(id) {
+      const k = (appData.apiKeys || []).find(x => x.id === id);
+      if (!k) return;
+      document.getElementById('akId').value = k.id;
+      document.getElementById('akName').value = k.name;
+      document.getElementById('akSecret').value = k.key || '';
+      document.getElementById('akEnabled').checked = !!k.enabled;
+      document.getElementById('apiKeyModalTitle').textContent = '编辑 API Key 与可用范围';
+      populateExtKeyScopeControls(k.groupIds || [], k.allowedModels || [], !!k.allowAllModels);
+      document.getElementById('apiKeyModal').classList.remove('hidden');
+    };
+
+    document.getElementById('akRegenBtn').addEventListener('click', async () => {
+      const gen = await api('/api/ext-api/keys/generate', { method: 'POST' });
+      document.getElementById('akSecret').value = gen.key || '';
+      showToast('已由服务端重新生成新密钥');
+    });
+
+    document.getElementById('akCopyBtn').addEventListener('click', async () => {
+      const val = document.getElementById('akSecret').value;
+      if (!val) return;
+      await navigator.clipboard.writeText(val);
+      showToast('API Key 已复制到剪贴板');
+    });
+
+    window.copyExtKey = async function(id) {
+      const k = (appData.apiKeys || []).find(x => x.id === id);
+      if (!k || !k.key) return;
+      await navigator.clipboard.writeText(k.key);
+      showToast('已复制完整 API Key 到剪贴板');
+    };
+
+    window.regenExtKey = async function(id) {
+      if (!confirm('重置后旧 Key 将立即失效，确认由服务端重新生成？')) return;
+      const updated = await api('/api/ext-api/keys/regenerate?id=' + encodeURIComponent(id), { method: 'POST' });
+      await loadOverview();
+      if (updated.key) {
+        await navigator.clipboard.writeText(updated.key).catch(() => {});
+        showToast('新 Key 已生成并复制到剪贴板');
+      }
+    };
+
+    window.toggleExtKey = async function(id) {
+      const k = (appData.apiKeys || []).find(x => x.id === id);
+      if (!k) return;
+      await api('/api/ext-api/keys', {
+        method: 'POST',
+        body: JSON.stringify(Object.assign({}, k, { enabled: !k.enabled }))
+      });
+      await loadOverview();
+    };
+
+    window.deleteExtKey = async function(id) {
+      if (!confirm('确认删除该 API Key？')) return;
+      await api('/api/ext-api/keys?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      showToast('API Key 已删除');
+      await loadOverview();
+    };
+
+    document.getElementById('apiKeyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const groupIds = [];
+      document.querySelectorAll('#akGroupsChecks input:checked').forEach(cb => groupIds.push(cb.value));
+      const allowedModels = [];
+      document.querySelectorAll('#akModelsChecks input:checked').forEach(cb => allowedModels.push(cb.value));
+
+      try {
+        await api('/api/ext-api/keys', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: document.getElementById('akId').value,
+            name: document.getElementById('akName').value.trim(),
+            key: document.getElementById('akSecret').value.trim(),
+            enabled: document.getElementById('akEnabled').checked,
+            allowAllModels: document.getElementById('akAllowAll').checked,
+            groupIds,
+            allowedModels
+          })
+        });
+        closeModal('apiKeyModal');
+        showToast('API Key 已保存');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById('importFromClientBtn').addEventListener('click', async () => {
+      const srcModels = appData.models || [];
+      if (srcModels.length === 0) {
+        alert('当前客户端模型列表为空，请直接点击「+ 新增独立 API 模型」。');
+        return;
+      }
+      if (!confirm(`确认将当前 ${srcModels.length} 个客户端模型配置复制一份到独立 API 模型库？（复制后两边互不影响，可各自独立修改）`)) return;
+      const existingIds = new Set((appData.apiModels || []).map(m => m.id));
+      let count = 0;
+      for (const m of srcModels) {
+        if (existingIds.has(m.id)) continue;
+        const copy = Object.assign({}, m, { groupId: '' });
+        await api('/api/ext-api/models', { method: 'POST', body: JSON.stringify(copy) });
+        count++;
+      }
+      await loadOverview();
+      showToast(`已成功导入 ${count} 个独立 API 模型副本`);
+    });
+
+    // ======================= PROVIDERS, CONFIG & LOGS =======================
+
+    function renderProviders() {
+      const box = document.getElementById('providersList');
+      box.innerHTML = (appData.providers || []).map(p => {
+        const modelsPreview = (p.discoveredModels || []).slice(0, 8).join(', ') + ((p.discoveredModels||[]).length > 8 ? ` ...共 ${p.discoveredModels.length} 个` : '');
+        return `
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <div class="flex-row">
+                  <strong style="font-size:14px;">${escapeHtml(p.name)}</strong>
+                  <span class="pill ${p.enabled ? 'pill-green' : 'pill-gray'}">${p.enabled ? '已启用' : '未启用'}</span>
+                  <span class="pill pill-blue mono">${escapeHtml(p.protocol)}</span>
+                </div>
+                <div class="mono muted" style="margin-top:5px;font-size:11px;">${escapeHtml(p.baseUrl)}</div>
+              </div>
+              <div class="flex-row">
+                <button type="button" class="btn btn-outline btn-sm" onclick="discoverModels('${escapeHtml(p.id)}')">探测模型</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openEditProvider('${escapeHtml(p.id)}')">编辑</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteProvider('${escapeHtml(p.id)}')">删除</button>
+              </div>
+            </div>
+            <div class="muted" style="margin-top:8px;">${escapeHtml(p.notes || '')}</div>
+            <div style="margin-top:8px;font-size:11px;color:#475569;">
+              <strong>可用上游模型：</strong> <span class="mono">${escapeHtml(modelsPreview || '暂无，可点击探测或手动填入')}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderConfig() {
+      const c = appData.zsConfig || {};
+      document.getElementById('zsFilePath').textContent = c.filePath || 'ZS';
+      document.getElementById('cfgHost').value = c.host || '0.0.0.0';
+      document.getElementById('cfgPort').value = c.port || 18080;
+      document.getElementById('cfgAdminPath').value = c.adminPath || '/zs-admin';
+      document.getElementById('cfgAdminUser').value = c.adminUser || 'admin';
+      document.getElementById('cfgClientToken').value = c.clientToken || '';
+      document.getElementById('cfgTlsEnabled').checked = !!c.tlsEnabled;
+      document.getElementById('cfgCertFile').value = c.tlsCertFile || './certs/fullchain.pem';
+      document.getElementById('cfgKeyFile').value = c.tlsKeyFile || './certs/privkey.pem';
+      updateClientPreview();
+
+      const ci = appData.certInfo || {};
+      const certBox = document.getElementById('certStatusBox');
+      if (ci.valid) {
+        certBox.innerHTML = `
+          <div style="color:var(--success);font-weight:700;margin-bottom:4px;">✓ 证书链与私钥校验有效</div>
+          <div>主题 (CN): <code>${escapeHtml(ci.subject)}</code> · 颁发者: <code>${escapeHtml(ci.issuer)}</code></div>
+          <div>绑定域名/IP: <code>${escapeHtml([...(ci.dnsNames||[]), ...(ci.ips||[])].join(', '))}</code></div>
+          <div>有效期至: <code>${escapeHtml(ci.notAfter)}</code></div>
+        `;
+      } else {
+        certBox.innerHTML = `
+          <div style="color:var(--amber);font-weight:600;">尚未检测到有效证书文件 (${ci.error ? escapeHtml(ci.error) : '未放置 PEM 文件'})</div>
+          <div class="muted" style="margin-top:4px;">您可以在下方一键生成自签名证书测试 HTTPS，或在绑定域名后粘贴正式 PEM 证书。</div>
+        `;
+      }
+    }
+
+    function updateClientPreview() {
+      const proto = document.getElementById('cfgTlsEnabled').checked ? 'https' : 'http';
+      const port = document.getElementById('cfgPort').value || '18080';
+      const host = location.hostname || '127.0.0.1';
+      const tok = document.getElementById('cfgClientToken').value.trim();
+      let text = `${proto}://${host}:${port}`;
+      if (tok) text += `\n${tok}`;
+      document.getElementById('clientZsPreview').textContent = text;
+    }
+
+    ['cfgTlsEnabled', 'cfgPort', 'cfgClientToken'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateClientPreview);
+      document.getElementById(id).addEventListener('change', updateClientPreview);
+    });
+
+    document.getElementById('genTokenBtn').addEventListener('click', () => {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+      let out = 'zs_';
+      for (let i = 0; i < 28; i++) out += chars[Math.floor(Math.random() * chars.length)];
+      document.getElementById('cfgClientToken').value = out;
+      updateClientPreview();
+    });
+
+    document.getElementById('zsConfigForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/api/zs-config', {
+          method: 'PUT',
+          body: JSON.stringify({
+            host: document.getElementById('cfgHost').value.trim(),
+            port: Number(document.getElementById('cfgPort').value),
+            adminPath: document.getElementById('cfgAdminPath').value.trim(),
+            adminUser: document.getElementById('cfgAdminUser').value.trim(),
+            adminPass: document.getElementById('cfgAdminPass').value,
+            clientToken: document.getElementById('cfgClientToken').value.trim(),
+            tlsEnabled: document.getElementById('cfgTlsEnabled').checked,
+            tlsCertFile: document.getElementById('cfgCertFile').value.trim(),
+            tlsKeyFile: document.getElementById('cfgKeyFile').value.trim()
+          })
+        });
+        document.getElementById('cfgAdminPass').value = '';
+        showToast('ZS 文件配置已保存');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById('uploadPemBtn').addEventListener('click', async () => {
+      const certPEM = document.getElementById('pemCertInput').value.trim();
+      const keyPEM = document.getElementById('pemKeyInput').value.trim();
+      if (!certPEM || !keyPEM) return alert('请同时粘贴证书链 PEM 与私钥 PEM 内容');
+      try {
+        await api('/api/tls/upload', {
+          method: 'POST',
+          body: JSON.stringify({ certPem: certPEM, keyPem: keyPEM })
+        });
+        document.getElementById('pemCertInput').value = '';
+        document.getElementById('pemKeyInput').value = '';
+        showToast('TLS 证书已验证并写入磁盘（已热加载）');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById('genSelfCertBtn').addEventListener('click', async () => {
+      const hosts = document.getElementById('selfSignHosts').value.split(',').map(s => s.trim()).filter(Boolean);
+      try {
+        await api('/api/tls/self-signed', {
+          method: 'POST',
+          body: JSON.stringify({ hosts })
+        });
+        showToast('自签名证书已生成并热加载');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    window.switchLogScope = function(scope) {
+      currentLogScope = scope;
+      document.getElementById('logScopeClientBtn').classList.toggle('active', scope === 'client');
+      document.getElementById('logScopeApiBtn').classList.toggle('active', scope === 'api');
+      document.getElementById('logAuthColHeader').classList.toggle('hidden', scope !== 'api');
+      renderLogs();
+    };
+
+    function renderLogs() {
+      const tbody = document.getElementById('logsTableBody');
+      const isApi = currentLogScope === 'api';
+      const logs = (isApi ? appData.apiLogs : appData.logs) || [];
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${isApi ? 8 : 7}" class="muted" style="text-align:center;padding:24px;">暂无${isApi ? '独立 API' : '客户端'}调用记录</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td class="mono">${escapeHtml(l.timestamp)}</td>
+          ${isApi ? `<td><span class="pill pill-blue">${escapeHtml(l.apiKeyName || l.apiKeyId || '-')}</span></td>` : ''}
+          <td><strong>${escapeHtml(l.clientModelName || l.clientModelId)}</strong></td>
+          <td class="mono">${escapeHtml(l.providerName || '-')} / ${escapeHtml(l.upstreamModel || '-')}</td>
+          <td class="mono">${escapeHtml(l.thinkingLevel || 'off')}</td>
+          <td class="mono">${l.latencyMs} ms</td>
+          <td class="mono">${l.promptTokens} / ${l.completionTokens}</td>
+          <td>
+            <span class="pill ${l.status === 'ok' ? 'pill-green' : 'pill-red'}">${escapeHtml(l.status)}</span>
+            ${l.errorDetail ? `<div style="color:var(--danger);font-size:11px;margin-top:2px;">${escapeHtml(l.errorDetail)}</div>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('clearLogsBtn').addEventListener('click', async () => {
+      const ep = currentLogScope === 'api' ? '/api/ext-api/logs' : '/api/logs';
+      await api(ep, { method: 'DELETE' });
+      await loadOverview();
+      showToast('日志已清空');
+    });
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+    window.closeModal = closeModal;
+
+    window.fillPreset = function(proto, url, name) {
+      document.getElementById('provProtocol').value = proto;
+      document.getElementById('provBaseUrl').value = url;
+      if (!document.getElementById('provName').value) {
+        document.getElementById('provName').value = name;
+      }
+    };
+
+    document.getElementById('addProviderBtn').addEventListener('click', () => {
+      document.getElementById('provId').value = '';
+      document.getElementById('provName').value = '';
+      document.getElementById('provProtocol').value = 'openai';
+      document.getElementById('provBaseUrl').value = 'https://api.openai.com/v1';
+      document.getElementById('provApiKey').value = '';
+      document.getElementById('provProxy').value = '';
+      document.getElementById('provModels').value = '';
+      document.getElementById('provNotes').value = '';
+      document.getElementById('provEnabled').checked = true;
+      document.getElementById('providerModal').classList.remove('hidden');
+    });
+
+    window.openEditProvider = function(id) {
+      const p = (appData.providers || []).find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('provId').value = p.id;
+      document.getElementById('provName').value = p.name;
+      document.getElementById('provProtocol').value = p.protocol;
+      document.getElementById('provBaseUrl').value = p.baseUrl;
+      document.getElementById('provApiKey').value = p.apiKey || '';
+      document.getElementById('provProxy').value = p.proxyUrl || '';
+      document.getElementById('provModels').value = (p.discoveredModels || []).join(', ');
+      document.getElementById('provNotes').value = p.notes || '';
+      document.getElementById('provEnabled').checked = !!p.enabled;
+      document.getElementById('providerModal').classList.remove('hidden');
+    };
+
+    document.getElementById('providerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/api/providers', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: document.getElementById('provId').value,
+            name: document.getElementById('provName').value.trim(),
+            protocol: document.getElementById('provProtocol').value,
+            baseUrl: document.getElementById('provBaseUrl').value.trim(),
+            apiKey: document.getElementById('provApiKey').value.trim(),
+            proxyUrl: document.getElementById('provProxy').value.trim(),
+            discoveredModels: document.getElementById('provModels').value.split(',').map(s => s.trim()).filter(Boolean),
+            notes: document.getElementById('provNotes').value.trim(),
+            enabled: document.getElementById('provEnabled').checked
+          })
+        });
+        closeModal('providerModal');
+        showToast('上游渠道已保存');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    window.deleteProvider = async function(id) {
+      if (!confirm('确认删除该上游渠道？')) return;
+      await api('/api/providers?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      showToast('已删除渠道');
+      await loadOverview();
+    };
+
+    window.discoverModels = async function(id) {
+      showToast('正在连接上游探测模型列表...');
+      try {
+        const res = await api('/api/providers/discover?id=' + encodeURIComponent(id), { method: 'POST' });
+        showToast(`探测成功：共发现 ${res.models?.length || 0} 个模型`);
+        await loadOverview();
+      } catch (err) {
+        alert('探测失败: ' + err.message);
+      }
+    };
+
+    // ======================= MODEL MODAL (Client & Independent API) =======================
+
+    function populateModelGroupSelect(scope, selectedGroupId = '') {
+      const sel = document.getElementById('mdlGroupId');
+      const groups = (scope === 'client' ? appData.modelGroups : appData.apiGroups) || [];
+      sel.innerHTML = `<option value="">-- 未分组 --</option>` + groups.map(g =>
+        `<option value="${escapeHtml(g.id)}" ${g.id === selectedGroupId ? 'selected' : ''}>${escapeHtml(g.name)}</option>`
+      ).join('');
+    }
+
+    function addRouteRow(route = { providerId: '', upstreamModel: '', priority: 0, weight: 100 }) {
+      const container = document.getElementById('routesContainer');
+      const div = document.createElement('div');
+      div.className = 'route-row';
+      const opts = (appData.providers || []).map(p =>
+        `<option value="${escapeHtml(p.id)}" ${p.id === route.providerId ? 'selected' : ''}>${escapeHtml(p.name)} (${p.protocol})</option>`
+      ).join('');
+      div.innerHTML = `
+        <select class="rt-prov">${opts}</select>
+        <input type="text" class="rt-model mono" placeholder="上游真实模型名 (如 claude-sonnet-4-20250514)" value="${escapeHtml(route.upstreamModel || '')}" required />
+        <input type="number" class="rt-prio mono" title="优先级 (0最高)" value="${route.priority ?? 0}" min="0" max="99" />
+        <input type="number" class="rt-weight mono" title="负载均衡权重" value="${route.weight ?? 100}" min="1" max="1000" />
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">移除</button>
+      `;
+      container.appendChild(div);
+    }
+
+    document.getElementById('addRouteRowBtn').addEventListener('click', () => addRouteRow());
+
+    window.openCreateModel = function(scope, defaultGroupId = '') {
+      document.getElementById('mdlScope').value = scope;
+      document.getElementById('mdlSortOrder').value = '0';
+      document.getElementById('modelModalTitle').textContent = scope === 'client' ? '发布客户端模型' : '新增独立对外 API 模型';
+      document.getElementById('mdlIdLabel').textContent = scope === 'client' ? '客户端模型唯一标识 (Model ID)' : '对外 API 调用模型名 (model 字段)';
+      document.getElementById('mdlEnabledLabel').textContent = scope === 'client' ? '在 ZEllion Sanctum 客户端中上架展示' : '启用该独立 API 模型（供已授权 API Key 调用）';
+
+      populateModelGroupSelect(scope, defaultGroupId);
+      document.getElementById('mdlId').value = '';
+      document.getElementById('mdlDisplayName').value = '';
+      document.getElementById('mdlProviderLabel').value = 'ZEllion';
+      document.getElementById('mdlContext').value = 128000;
+      document.getElementById('mdlMaxOut').value = 16384;
+      document.getElementById('mdlDefaultThink').value = 'medium';
+      document.getElementById('modText').checked = true;
+      document.getElementById('modVision').checked = true;
+      document.getElementById('modAudio').checked = false;
+      document.getElementById('modPdf').checked = false;
+      document.getElementById('modTools').checked = true;
+      document.getElementById('modReasoning').checked = true;
+      document.querySelectorAll('#thinkLevelsGroup input').forEach(cb => {
+        cb.checked = ['off', 'low', 'medium', 'high'].includes(cb.value);
+      });
+      document.getElementById('mdlSysPrefix').value = '';
+      document.getElementById('mdlDesc').value = '';
+      document.getElementById('mdlEnabled').checked = true;
+      document.getElementById('routesContainer').innerHTML = '';
+      addRouteRow({ providerId: appData.providers?.[0]?.id || '', upstreamModel: '', priority: 0, weight: 100 });
+      document.getElementById('modelModal').classList.remove('hidden');
+    };
+
+    document.getElementById('addModelBtn').addEventListener('click', () => window.openCreateModel('client', ''));
+    document.getElementById('addExtModelBtn').addEventListener('click', () => window.openCreateModel('api', ''));
+
+    window.openEditModel = function(scope, id) {
+      const list = scope === 'client' ? (appData.models || []) : (appData.apiModels || []);
+      const m = list.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('mdlScope').value = scope;
+      document.getElementById('mdlSortOrder').value = m.sortOrder ?? 0;
+      document.getElementById('modelModalTitle').textContent = scope === 'client' ? '编辑客户端模型配置' : '编辑独立对外 API 模型配置';
+      document.getElementById('mdlIdLabel').textContent = scope === 'client' ? '客户端模型唯一标识 (Model ID)' : '对外 API 调用模型名 (model 字段)';
+      document.getElementById('mdlEnabledLabel').textContent = scope === 'client' ? '在 ZEllion Sanctum 客户端中上架展示' : '启用该独立 API 模型（供已授权 API Key 调用）';
+
+      populateModelGroupSelect(scope, m.groupId || '');
+      document.getElementById('mdlId').value = m.id;
+      document.getElementById('mdlDisplayName').value = m.displayName;
+      document.getElementById('mdlProviderLabel').value = m.providerLabel || 'ZEllion';
+      document.getElementById('mdlContext').value = m.contextWindow || 128000;
+      document.getElementById('mdlMaxOut').value = m.maxOutputTokens || 16384;
+      document.getElementById('mdlDefaultThink').value = m.defaultThinkingLevel || 'medium';
+      document.getElementById('modText').checked = !!m.modalities?.text;
+      document.getElementById('modVision').checked = !!m.modalities?.vision;
+      document.getElementById('modAudio').checked = !!m.modalities?.audio;
+      document.getElementById('modPdf').checked = !!m.modalities?.pdf;
+      document.getElementById('modTools').checked = !!m.modalities?.tools;
+      document.getElementById('modReasoning').checked = !!m.modalities?.reasoning;
+      const lvls = m.supportedThinkingLevels || [];
+      document.querySelectorAll('#thinkLevelsGroup input').forEach(cb => {
+        cb.checked = lvls.includes(cb.value);
+      });
+      document.getElementById('mdlSysPrefix').value = m.systemPromptPrefix || '';
+      document.getElementById('mdlDesc').value = m.description || '';
+      document.getElementById('mdlEnabled').checked = !!m.enabled;
+      document.getElementById('routesContainer').innerHTML = '';
+      (m.routes || []).forEach(r => addRouteRow(r));
+      if (!m.routes || m.routes.length === 0) addRouteRow();
+      document.getElementById('modelModal').classList.remove('hidden');
+    };
+
+    window.toggleModelQuick = async function(scope, id) {
+      const list = scope === 'client' ? (appData.models || []) : (appData.apiModels || []);
+      const m = list.find(x => x.id === id);
+      if (!m) return;
+      const copy = Object.assign({}, m, { enabled: !m.enabled });
+      const ep = scope === 'client' ? '/api/models' : '/api/ext-api/models';
+      await api(ep, { method: 'POST', body: JSON.stringify(copy) });
+      showToast(copy.enabled ? '模型已上架启用' : '模型已下架隐藏');
+      await loadOverview();
+    };
+
+    window.deleteModelByScope = async function(scope, id) {
+      if (!confirm('确认删除该模型配置？')) return;
+      const ep = scope === 'client' ? '/api/models?id=' : '/api/ext-api/models?id=';
+      await api(ep + encodeURIComponent(id), { method: 'DELETE' });
+      showToast('模型已删除');
+      await loadOverview();
+    };
+
+    document.getElementById('modelForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const scope = document.getElementById('mdlScope').value;
+      const levels = [];
+      document.querySelectorAll('#thinkLevelsGroup input:checked').forEach(cb => levels.push(cb.value));
+      if (levels.length === 0) levels.push('off');
+
+      const routes = [];
+      document.querySelectorAll('#routesContainer .route-row').forEach(row => {
+        const providerId = row.querySelector('.rt-prov').value;
+        const upstreamModel = row.querySelector('.rt-model').value.trim();
+        const priority = Number(row.querySelector('.rt-prio').value) || 0;
+        const weight = Number(row.querySelector('.rt-weight').value) || 100;
+        if (providerId && upstreamModel) {
+          routes.push({ providerId, upstreamModel, priority, weight });
+        }
+      });
+
+      const ep = scope === 'client' ? '/api/models' : '/api/ext-api/models';
+      try {
+        await api(ep, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: document.getElementById('mdlId').value.trim(),
+            displayName: document.getElementById('mdlDisplayName').value.trim(),
+            providerLabel: document.getElementById('mdlProviderLabel').value.trim() || 'ZEllion',
+            groupId: document.getElementById('mdlGroupId').value,
+            sortOrder: Number(document.getElementById('mdlSortOrder').value) || 0,
+            enabled: document.getElementById('mdlEnabled').checked,
+            contextWindow: Number(document.getElementById('mdlContext').value) || 128000,
+            maxOutputTokens: Number(document.getElementById('mdlMaxOut').value) || 16384,
+            defaultThinkingLevel: document.getElementById('mdlDefaultThink').value,
+            supportedThinkingLevels: levels,
+            modalities: {
+              text: document.getElementById('modText').checked,
+              vision: document.getElementById('modVision').checked,
+              audio: document.getElementById('modAudio').checked,
+              pdf: document.getElementById('modPdf').checked,
+              tools: document.getElementById('modTools').checked,
+              reasoning: document.getElementById('modReasoning').checked
+            },
+            systemPromptPrefix: document.getElementById('mdlSysPrefix').value.trim(),
+            description: document.getElementById('mdlDesc').value.trim(),
+            routes
+          })
+        });
+        closeModal('modelModal');
+        showToast(scope === 'client' ? '客户端模型配置已保存' : '独立 API 模型配置已保存');
+        await loadOverview();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    if (token) {
+      loadOverview();
+    }
+  </script>
+</body>
+</html>

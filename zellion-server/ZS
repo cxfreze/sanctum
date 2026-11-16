@@ -1,0 +1,31 @@
+# ============================================================================
+# ZEllion Server 核心启动配置 (无后缀文件 ZS)
+# 说明:
+# 1. 直接在浏览器访问 http(s)://IP:PORT/ 或任何未知路径将返回完全空白 (HTTP 204 无内容)
+# 2. 仅访问下方 ADMIN_PATH 指定的隐蔽管理入口才能打开 Magpie 聚合管理后台
+# 3. 客户端 ZEllion Sanctum 通过安装目录下的 ZS 文件连接本服务端的 IP:PORT
+# ============================================================================
+
+# 监听启动 IP (0.0.0.0 表示监听所有网卡，127.0.0.1 表示仅本机)
+HOST=0.0.0.0
+
+# 监听端口 (同时承载客户端加密网关与隐蔽管理入口)
+PORT=80
+
+# 管理后台隐蔽访问路径 (必须以 / 开头且不能为 /，例如 /zs-admin)
+ADMIN_PATH=/zs-admin
+
+# 管理后台管理员账号与密码
+ADMIN_USER=zellionadmin
+ADMIN_PASS=zellion*******
+
+# 可选：客户端连接访问密钥 (留空表示不启用密钥，客户端 ZS 文件只填服务端地址即可直连；填写后客户端 ZS 第二行需填此密钥)
+CLIENT_TOKEN=
+
+# HTTPS / TLS 证书配置 (绑定域名后将 TLS_ENABLED 设为 true 并配置 PEM 证书与私钥路径即可启用 HTTPS)
+TLS_ENABLED=false
+TLS_CERT_FILE=./certs/fullchain.pem
+TLS_KEY_FILE=./certs/privkey.pem
+
+# 网关渠道与客户端模型持久化数据路径
+DATA_FILE=./data/gateway-state.json
